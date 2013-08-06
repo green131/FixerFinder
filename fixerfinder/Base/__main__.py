@@ -40,23 +40,25 @@ def findOriginal(title):
         #Make search_result title lowercase
         search_result.title = search_result.title.lower()
         #Find date created
-        created_date = datetime.date(search_result.created)
-        created_time = datetime.time(search_result.created)
+        created = datetime.datetime.fromtimestamp(search_result.created).date()
+        #Get current date
+        time = datetime.datetime.now().date()
         #Identify if search_result isFixed
         fixed = isFixed(search_result.title, keywords)
         #DEBUG
         print("Search Result " + str(x+1) + ": " + str(search_result.title) + "\n"
               + "-- ID: " + str(search_result.id) + "\n"
-              + "-- Created (day): " + str(created_date) + "\n"
-              + "-- Created (time): " + str(created_time) + "\n"
+              + "-- Created Date: " + str(created) + "\n"
+              + "-- Current Date: " + str(time) + "\n"
               + "-- Contains Fixed: " + str(fixed))
         #Compare search_result with fixed
-        if (created_date.day == datetime.datetime.now().date().day):
+        if (created == datetime.datetime.now() and fixed == False):
             print("Same day match...")
-            if (search_result.title == title):
-                print("MATCH FOUND: \n" 
-                    + search_result.title + "\n"
+            if search_result.title in title or title in search_result.title:
+                print("MATCH FOUND: \n   " 
+                    + search_result.title + "\n   "
                     + title)
+                break
         #Counter
         x+=1
         if x>(max_searching-1):
@@ -64,7 +66,7 @@ def findOriginal(title):
 
 
 #-------------------Main Script-------------------------
-sleep=60
+sleep=20
 max_searching=15
 if __name__ == "__main__":
     #Login & Connection
