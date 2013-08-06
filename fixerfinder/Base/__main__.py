@@ -41,9 +41,15 @@ def findOriginal(title, original_submission):
         #Make search_result title lowercase
         search_result_title = search_result.title.lower()
         #Find date created
-        created = datetime.datetime.fromtimestamp(search_result.created).date().day
+        created = datetime.datetime.fromtimestamp(search_result.created).date()
+        created_year = created.year
+        created_month = created.month
+        created_day = created.day
         #Get current date
-        time = datetime.datetime.now().date().day
+        time = datetime.datetime.now().date()
+        time_year = time.year
+        time_month = time.month
+        time_day = time.day
         #Identify if search_result isFixed
         fixed = isFixed(search_result_title, keywords)
         #DEBUG
@@ -53,23 +59,23 @@ def findOriginal(title, original_submission):
               + "-- Current Date: " + str(time) + "\n"
               + "-- Contains Fixed: " + str(fixed))
         #Compare search_result with fixed
-        if math.fabs(created - time) < 2:
+        if (created_year == time_year) and (created_month == time_month) and (math.fabs(created_day - time_day) < 2):
             print("Same day (+-1) match...")
             if fixed == False:
                 print("Not Fixed...")
-                if search_result_title in title or title in search_result_title:
+                if " ".join(search_result_title.split()) == " ".join(title.split()):
                     print("MATCH FOUND: \n   " 
                         + search_result.title + "\n   "
                         + title)
                     matched_url = search_result.short_link
                     matched_title = search_result.title
                     print("Posting Comment...")
-                    original_submission.add_comment("**Original Post**  " +
-                                           "This FIXED post has a found Original Post  " +
-                                           "  " + 
-                                           "Title: " + matched_title + "  "
-                                           "Link: [" + matched_url + "](" + matched_url + ")  " +
-                                           "  " +
+                    original_submission.add_comment("**Original Post**\n\n" +
+                                           "This FIXED post has a found Original Post\n\n" +
+                                           "\n\n" + 
+                                           "Title: " + matched_title + "\n\n"
+                                           "Link: [" + matched_url + "](" + matched_url + ")\n\n" +
+                                           "\n\n" +
                                            "*Questions or concerns? Message /u/fixerfinder*")
                     print("...Comment Posted")
                     break
