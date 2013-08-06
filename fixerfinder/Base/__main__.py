@@ -2,6 +2,7 @@ import time
 import datetime
 import praw
 import math
+import difflib
 
 global done
 global fixed
@@ -23,9 +24,15 @@ def findFixed():
             print(str(i/10) + "%")
         title_lwr = submission.title.lower()
         if submission.id not in done and isFixed(title_lwr, keywords):
-            fixed.append(submission.id)
-            print("isFixed: (" + submission.id + ") " + title_lwr)
-            findOriginal(title_lwr, submission)
+            doc = open('C:/Users/Daniel/Documents/GitHub/fixerfinder/fixerfinder/Base/posted.txt', 'rU')
+            if submission.id in doc:
+                print("Skipped - ID in DOC")
+                doc.close()
+            else:
+                fixed.append(submission.id)
+                print("isFixed: (" + submission.id + ") " + title_lwr)
+                findOriginal(title_lwr, submission)
+                doc.close()
         done.append(submission.id)
         
 def findOriginal(title, original_submission):
@@ -63,19 +70,23 @@ def findOriginal(title, original_submission):
             print("Same day (+-1) match...")
             if fixed == False:
                 print("Not Fixed...")
-                if " ".join(search_result_title.split()) == " ".join(title.split()):
+                search_result_title = " ".join(search_result_title.split())
+                fixed_title = " ".join(title.split())
+                match = difflib.SequenceMatcher(None, search_result_title, fixed_title).ratio()
+                if match > 0.80:
                     print("MATCH FOUND: \n   " 
                         + search_result.title + "\n   "
                         + title)
                     matched_url = search_result.short_link
                     matched_title = search_result.title
+                    doc = open('C:/Users/Daniel/Documents/GitHub/fixerfinder/fixerfinder/Base/posted.txt', 'a')
+                    doc.write('\n' + str(original_submission.id))
+                    doc.close()
                     print("Posting Comment...")
-                    original_submission.add_comment("**Original Post**\n\n" +
-                                           "This FIXED post has a found Original Post\n\n" +
-                                           "\n\n" + 
-                                           "Title: " + matched_title + "\n\n"
-                                           "Link: [" + matched_url + "](" + matched_url + ")\n\n" +
-                                           "\n\n" +
+                    original_submission.add_comment("**Original Post** (" + match + "%) \n\n" +
+                                           "-------------\n\n" + 
+                                           "**Title**: " + matched_title + "\n\n"
+                                           "**Link**: [" + matched_url + "](" + matched_url + ")\n\n" +
                                            "*Questions or concerns? Message /u/fixerfinder*")
                     print("...Comment Posted")
                     break
@@ -103,6 +114,6 @@ if __name__ == "__main__":
         findFixed()
         print("...Scan Complete")
         #Shorten Done to Include Only End Points
-        done = [done.pop(0), done.pop(-1)]
+        done = [done[0], done[-1]]
         print("Entering Sleep (" + str(sleep) + "s)")
         time.sleep(sleep)
