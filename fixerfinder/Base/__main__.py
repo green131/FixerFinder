@@ -24,10 +24,10 @@ def findFixed():
         if submission.id not in done and isFixed(title_lwr, keywords):
             fixed.append(submission.id)
             print("isFixed: (" + submission.id + ") " + title_lwr)
-            findOriginal(title_lwr)
+            findOriginal(title_lwr, submission)
         done.append(submission.id)
         
-def findOriginal(title):
+def findOriginal(title, original_submission):
     #Format Title to Find Original Post
     print("Before: " + str(title))
     for word in keywords:
@@ -38,26 +38,37 @@ def findOriginal(title):
     x=0
     for search_result in r.search(title):
         #Make search_result title lowercase
-        search_result.title = search_result.title.lower()
+        search_result_title = search_result.title.lower()
         #Find date created
         created = datetime.datetime.fromtimestamp(search_result.created).date()
         #Get current date
         time = datetime.datetime.now().date()
         #Identify if search_result isFixed
-        fixed = isFixed(search_result.title, keywords)
+        fixed = isFixed(search_result_title, keywords)
         #DEBUG
-        #print("Search Result " + str(x+1) + ": " + str(search_result.title) + "\n"
-        #      + "-- ID: " + str(search_result.id) + "\n"
-        #      + "-- Created Date: " + str(created) + "\n"
-        #      + "-- Current Date: " + str(time) + "\n"
-        #      + "-- Contains Fixed: " + str(fixed))
+        print("Search Result " + str(x+1) + ": " + str(search_result_title) + "\n"
+              + "-- ID: " + str(search_result.id) + "\n"
+              + "-- Created Date: " + str(created) + "\n"
+              + "-- Current Date: " + str(time) + "\n"
+              + "-- Contains Fixed: " + str(fixed))
         #Compare search_result with fixed
         if (created == time and fixed == False):
-            print("Same day match...")
-            if search_result.title in title or title in search_result.title:
+            #print("Same day match...")
+            if search_result_title in title or title in search_result_title:
                 print("MATCH FOUND: \n   " 
                     + search_result.title + "\n   "
                     + title)
+                matched_url = search_result.short_link
+                matched_title = search_result.title
+                print("Posting Comment...")
+                original_submission.add_comment("**Original Post**  " +
+                                       "This FIXED post has a found Original Post  " +
+                                       "  " + 
+                                       "Title: " + matched_title + "  "
+                                       "Link: [" + matched_url + "](" + matched_url + ")  " +
+                                       "  " +
+                                       "*Questions or concerns? Message /u/fixerfinder*")
+                print("...Comment Posted")
                 break
         #Counter
         x+=1
