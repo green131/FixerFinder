@@ -1,6 +1,7 @@
 import time
 import datetime
 import praw
+import math
 
 global done
 global fixed
@@ -40,9 +41,9 @@ def findOriginal(title, original_submission):
         #Make search_result title lowercase
         search_result_title = search_result.title.lower()
         #Find date created
-        created = datetime.datetime.fromtimestamp(search_result.created).date()
+        created = datetime.datetime.fromtimestamp(search_result.created).date().day
         #Get current date
-        time = datetime.datetime.now().date()
+        time = datetime.datetime.now().date().day
         #Identify if search_result isFixed
         fixed = isFixed(search_result_title, keywords)
         #DEBUG
@@ -52,24 +53,26 @@ def findOriginal(title, original_submission):
               + "-- Current Date: " + str(time) + "\n"
               + "-- Contains Fixed: " + str(fixed))
         #Compare search_result with fixed
-        if (created == time and fixed == False):
-            #print("Same day match...")
-            if search_result_title in title or title in search_result_title:
-                print("MATCH FOUND: \n   " 
-                    + search_result.title + "\n   "
-                    + title)
-                matched_url = search_result.short_link
-                matched_title = search_result.title
-                print("Posting Comment...")
-                original_submission.add_comment("**Original Post**  " +
-                                       "This FIXED post has a found Original Post  " +
-                                       "  " + 
-                                       "Title: " + matched_title + "  "
-                                       "Link: [" + matched_url + "](" + matched_url + ")  " +
-                                       "  " +
-                                       "*Questions or concerns? Message /u/fixerfinder*")
-                print("...Comment Posted")
-                break
+        if math.fabs(created - time) < 2:
+            print("Same day (+-1) match...")
+            if fixed == False:
+                print("Not Fixed...")
+                if search_result_title in title or title in search_result_title:
+                    print("MATCH FOUND: \n   " 
+                        + search_result.title + "\n   "
+                        + title)
+                    matched_url = search_result.short_link
+                    matched_title = search_result.title
+                    print("Posting Comment...")
+                    original_submission.add_comment("**Original Post**  " +
+                                           "This FIXED post has a found Original Post  " +
+                                           "  " + 
+                                           "Title: " + matched_title + "  "
+                                           "Link: [" + matched_url + "](" + matched_url + ")  " +
+                                           "  " +
+                                           "*Questions or concerns? Message /u/fixerfinder*")
+                    print("...Comment Posted")
+                    break
         #Counter
         x+=1
         if x>(max_searching-1):
