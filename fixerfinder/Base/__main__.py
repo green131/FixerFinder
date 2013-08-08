@@ -24,7 +24,7 @@ def findFixed():
             print(str(i/10) + "%")
         title_lwr = submission.title.lower()
         if submission.id not in done and isFixed(title_lwr, keywords):
-            doc = open('C:/Users/Daniel/Documents/GitHub/fixerfinder/fixerfinder/Base/posted.txt', 'rU')
+            doc = open('posted.txt', 'rU')
             if submission.id in doc:
                 print("Skipped - ID in DOC")
                 doc.close()
@@ -66,8 +66,8 @@ def findOriginal(title, original_submission):
               + "-- Current Date: " + str(time) + "\n"
               + "-- Contains Fixed: " + str(fixed))
         #Compare search_result with fixed
-        if (created_year == time_year) and (created_month == time_month) and (math.fabs(created_day - time_day) < 2):
-            print("Same day (+-1) match...")
+        if (created_year == time_year) and (created_month == time_month) and (math.fabs(created_day - time_day) < 3):
+            print("Same day (+-3) match...")
             if fixed == False:
                 print("Not Fixed...")
                 search_result_title = " ".join(search_result_title.split())
@@ -109,11 +109,15 @@ if __name__ == "__main__":
     subreddit = r.get_subreddit('all')
     #Continuous Iterations
     while True:
-        print("Beginning Scan...")
-        #Find FIXED Submissions
-        findFixed()
-        print("...Scan Complete")
-        #Shorten Done to Include Only End Points
-        done = [done[0], done[-1]]
-        print("Entering Sleep (" + str(sleep) + "s)")
-        time.sleep(sleep)
+        try:
+            print("Beginning Scan...")
+            #Find FIXED Submissions
+            findFixed()
+            print("...Scan Complete")
+            #Shorten Done to Include Only End Points
+            done = [done[0], done[-1]]
+            print("Entering Sleep (" + str(sleep) + "s)")
+            time.sleep(sleep)
+        except:
+            print("Exception Encountered... Skipping")
+            time.sleep(sleep*2)
